@@ -6,5 +6,5 @@ Networking Demo
 - Ask me if you don't understand a method or some code
 
 To run:
-- Run server.main()
-- Run client.main() twice
+- Run Server.main()
+- Run Client.main() twice
