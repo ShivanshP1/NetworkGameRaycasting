@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class Game {
 	static JFrame gameWindow;
@@ -23,6 +24,7 @@ public class Game {
 	static TextureList textures;
 	static TextureList sprites;
 	static Sprite[] test = new Sprite[5];	
+	private static Robot robo;
 	static Level currentLevel = new Level(new int[][]{
 												{2,2,2,1,2,1,2,2,2,2,2,2,2,2,2,2},
 												{2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,2},
@@ -52,10 +54,14 @@ public class Game {
 
 	// ------------------------------------------------------------------------------
 	public static void main(String[] args) {
-
 		try {
-			textures = new TextureList(ImageIO.read(new File("images/textures.png")));
-			sprites = new TextureList(ImageIO.read(new File("images/spriteSheet.png")));
+            robo = new Robot();
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
+		try {
+			textures = new TextureList(ImageIO.read(new File("D://textures.png")));
+			sprites = new TextureList(ImageIO.read(new File("D://spriteSheet.png")));
 		} catch (IOException e) {
 			System.out.println("failed to get image");
 			e.printStackTrace();
@@ -97,12 +103,10 @@ public class Game {
 			mapWindow.repaint();
 			try {
 				Thread.sleep(25);
-			} catch (Exception e) {
-			}
+			} catch (Exception e) {}
 
 			player.movement(up, down, left, right, turnLeft, turnRight, currentLevel);
-            player.moveProjectile();
-            
+            player.testgun.moveProjectile(player.getProjectilesList());
             //skeleton.shoot(player);
             skeleton.moveProjectile();
             zombie.attack(player);
@@ -112,7 +116,34 @@ public class Game {
             }
 		}
 	} // runGameLoop method end
+	// ------------------------------------------------------------------------------
+	
+	private static void MouseController(MouseEvent e) {
+		gameWindow.setCursor(Cursor.CROSSHAIR_CURSOR);
+		final int midX = Const.TRUE_WIDTH/2;
+		final int midY = Const.TRUE_HEIGHT/2;
+		int adjfactor = -7;		
 
+        robo.mouseMove(midX + gameWindow.getX(), midY + gameWindow.getY());
+        int moveX = e.getX() - midX;
+        
+        if(moveX > adjfactor+3) {
+        	turnRight = true;
+        	turnLeft = false;
+        }
+        else if (moveX < adjfactor-3){
+        	turnLeft = true;
+        	turnRight = false;    	
+        }
+        else{
+        	try {
+				Thread.sleep(20);
+			} catch (Exception e1){} 
+        	turnRight = false;
+        	turnLeft = false;
+        }
+	}
+	
 	// ------------------------------------------------------------------------------
 	static class GraphicsPanel extends JPanel {
 		public GraphicsPanel() {
@@ -283,10 +314,12 @@ public class Game {
 	// ------------------------------------------------------------------------------
 	static class MyMouseMotionListener implements MouseMotionListener {
 		public void mouseMoved(MouseEvent e) {
+			MouseController(e);
 		}
 
 		public void mouseDragged(MouseEvent e) {
+			MouseController(e);
 		}
 	} // MyMouseMotionListener class end
 
-} // BasicGameTemplate class end
+} // BasicGameTem
